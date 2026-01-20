@@ -53,7 +53,7 @@ public class UniformRandomSelection {
             }
             fileOut.println();
 
-            System.out.println("The file named -> "+ outputFilename + " <- Added To.");
+            System.out.println("The output file named -> "+ outputFilename + " <- has been added to.");
 
         } catch (IOException e) {
             System.err.println("Error writing to the output file: " + outputFilename);
