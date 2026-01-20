@@ -20,7 +20,7 @@ public class UniformRandomSelection {
 
     }
 
-    //This method reads data from the file specified by the first argument when running from the command line
+    //This method will try to read data from the file specified by the users first argument
     private static Dataset readFromDataset(String filename) {
 
         Scanner scanner = null;
@@ -29,11 +29,45 @@ public class UniformRandomSelection {
             scanner= new Scanner(new File(filename));
 
         } catch (FileNotFoundException e) {
-            System.err.println("Error: Could not read file.");
+            System.err.println("Error: Could not read file: " + filename);
                     System.exit(1);
-            throw new RuntimeException(e);
         }
-        return null;
+
+        if (!scanner.hasNextInt()){
+            System.err.println("Missing the N for number of points in the first line of: " + filename);
+            System.exit(1);
+        }
+        int numPoints = scanner.nextInt();
+
+        if (!scanner.hasNextInt()){
+            System.err.println("Missing the D for number of dimensions in the first line of: " + filename);
+            System.exit(1);
+        }
+        int dimensions = scanner.nextInt();
+
+        //Set up the matrix for all points
+        float[][] data = new float[numPoints][dimensions];
+
+        int index = 0;
+        int j =0;
+        //Now we need to add our data to the matrix
+        for (index =0; index < numPoints; index++)
+        {
+            for (j=0; j < dimensions; j++){
+                if(!scanner.hasNextFloat()){
+                    System.err.println("File either ended or was improperly formated: " + filename);
+                    System.exit(1);
+                }
+                data[index][j] = scanner.nextFloat();
+
+            }
+
+        }
+
+        scanner.close();
+
+        //Now, only if were able to fill our matrix properly, we return the built dataset
+        return new Dataset(numPoints, dimensions, data);
     }
 
     private static Parameters parseUserArguments(String[] args) {
