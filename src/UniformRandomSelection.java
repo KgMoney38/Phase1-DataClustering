@@ -5,10 +5,35 @@
 
 //Coding practices resource I have decided to primarily use: https://www.cs.cornell.edu/courses/JavaAndDS/JavaStyle.html
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Locale;
+import java.util.Scanner;
+
 public class UniformRandomSelection {
     public static void main(String[] args) {
-        Parameters parameters = parseUserArguments(args);
 
+        Parameters parameters = parseUserArguments(args);
+        Dataset dataset = readFromDataset(parameters.filename);
+
+
+
+    }
+
+    //This method reads data from the file specified by the first argument when running from the command line
+    private static Dataset readFromDataset(String filename) {
+
+        Scanner scanner = null;
+        try {
+            System.err.println("Madeit");
+            scanner= new Scanner(new File(filename));
+
+        } catch (FileNotFoundException e) {
+            System.err.println("Error: Could not read file.");
+                    System.exit(1);
+            throw new RuntimeException(e);
+        }
+        return null;
     }
 
     private static Parameters parseUserArguments(String[] args) {
@@ -18,7 +43,60 @@ public class UniformRandomSelection {
             System.err.println("Incorrect Number of Arguments: Must have exactly 5 arguments");
             System.exit(1);
         }
-        return null;
+        int numClusters = 0;
+        int maxIteration = 0;
+        float convergenceThreshold= 0.00F;
+        int numRuns = 0;
+        String filename= args[0];
+
+        try{
+            numClusters= Integer.parseInt(args[1]);
+        } catch (NumberFormatException e) {
+            System.err.println("The format for number of clusters must be an integer.");
+            System.exit(1);
+        }
+
+        try{
+            maxIteration= Integer.parseInt(args[2]);
+        } catch (NumberFormatException e) {
+            System.err.println("The format for the maximum number of iterations must be an integer.");
+            System.exit(1);
+        }
+
+        try{
+            convergenceThreshold = Float.parseFloat(args[3]);
+        }catch (NumberFormatException e) {
+            System.err.println("The format for the conversion threshold must be in float format.");
+            System.exit(1);
+        }
+
+        try{
+            numRuns= Integer.parseInt(args[4]);
+        } catch (NumberFormatException e) {
+            System.err.println("The format for number of runs must be an integer.");
+            System.exit(1);
+        }
+
+        //Final parameter check to meet criteria
+        if(numClusters <= 1){
+            System.err.println("The number of clusters must be a positive integer greater than 1.");
+            System.exit(1);
+        }
+        if(maxIteration<1){
+            System.err.println("The maximum number of iterations must be a positive integer.");
+            System.exit(1);
+        }
+        if(convergenceThreshold<=0){
+            System.err.println("The convergence threshold must be a non negative real number.");
+            System.exit(1);
+        }
+        if(numRuns<1){
+            System.err.println("The minimum number of runs is 1.");
+            System.exit(1);
+        }
+
+        //Only if we pass all the checks, return our parameters
+        return new Parameters(filename,numClusters,maxIteration,convergenceThreshold,numRuns);
     }
 
     //Class to handle and protect my different arguments
@@ -49,10 +127,10 @@ public class UniformRandomSelection {
     private static final class Dataset{
         final int numberOfPoints;
         final int numOfDimensions;
-        final double[][] data;
+        final float[][] data;
 
         //Constructor parameters for Dataset class
-        private Dataset(int numPoints, int numDimensions, double[][] data) {
+        private Dataset(int numPoints, int numDimensions, float[][] data) {
             this.numberOfPoints = numPoints;
             this.numOfDimensions = numDimensions;
             this.data = data;
