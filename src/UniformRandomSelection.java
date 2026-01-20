@@ -22,6 +22,21 @@ public class UniformRandomSelection {
     }
 
     private static void printTheCenters(float[][] data, int[] randomIndexes) {
+        int index =0;
+        for (index =0; index< randomIndexes.length; index++)
+        {
+            int count = randomIndexes[index];
+            int j = 0;
+            for(j=0; j < data[count].length; j++)
+            {
+                if (j>0){
+                    System.out.print(" ");
+                }
+                System.out.print(data[count][j]);
+
+            }
+            System.out.println();
+        }
     }
 
     private static int[] generateKRandomIndexes(int numberOfPoints, int numOfClusters, Random random) {
