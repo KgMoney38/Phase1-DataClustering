@@ -5,8 +5,17 @@
 
 //Coding practices resource I have decided to primarily use: https://www.cs.cornell.edu/courses/JavaAndDS/JavaStyle.html
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+import java.util.Scanner;
+
 
 public class UniformRandomSelection {
     public static void main(String[] args) {
@@ -51,14 +60,12 @@ public class UniformRandomSelection {
             int index =0;
 
             //Loop for each center selected in my randomIndexes
-            for (index =0; index< randomIndexes.length; index++)
-            {
+            for (index =0; index< randomIndexes.length; index++) {
                 int count = randomIndexes[index];
                 int j = 0;
 
                 //Loop for each dimension in selected data point
-                for(j=0; j < data[count].length; j++)
-                {
+                for(j=0; j < data[count].length; j++) {
                     //Just add a space between the values printed
                     if (j>0){
                         fileOut.print(" ");
@@ -70,8 +77,6 @@ public class UniformRandomSelection {
             }
             fileOut.println();
 
-            System.out.println("The output file named -> "+ outputFilename + " <- has been added to.");
-
         } catch (IOException e) {
             System.err.println("Error writing to the output file: " + outputFilename);
             System.exit(1);
@@ -81,12 +86,10 @@ public class UniformRandomSelection {
     //Just the method to print the centers we selected to the console
     private static void printTheCenters(double[][] data, int[] randomIndexes) {
         int index =0;
-        for (index =0; index< randomIndexes.length; index++)
-        {
+        for (index =0; index< randomIndexes.length; index++) {
             int count = randomIndexes[index];
             int j = 0;
-            for(j=0; j < data[count].length; j++)
-            {
+            for(j=0; j < data[count].length; j++) {
                 if (j>0){
                     System.out.print(" ");
                 }
@@ -100,8 +103,7 @@ public class UniformRandomSelection {
     //Method that delects the K unique indexes randomly and uniformly
     private static int[] generateKRandomIndexes(int numberOfPoints, int numOfClusters, Random random) {
 
-        if (numOfClusters > numberOfPoints)
-        {
+        if (numOfClusters > numberOfPoints) {
             System.err.println("Number of clusters cant be greater than the number of points.");
             System.exit(1);
 
@@ -112,8 +114,7 @@ public class UniformRandomSelection {
 
         //Fill the list
         int i = 0;
-        for (i=0; i< numberOfPoints; i++)
-        {
+        for (i=0; i< numberOfPoints; i++) {
             indexArray.add(i);
         }
 
@@ -125,8 +126,7 @@ public class UniformRandomSelection {
         int idx = 0;
 
         //Copy the k number of indices from our list to our randomized array
-        for(idx=0; idx < numOfClusters; idx++)
-        {
+        for(idx=0; idx < numOfClusters; idx++) {
             randomized[idx]=indexArray.get(idx);
         }
 
@@ -164,8 +164,7 @@ public class UniformRandomSelection {
         int dimIndex =0;
 
         //Now we add our data to the matrix
-        for (pointsIndex =0; pointsIndex < numPoints; pointsIndex++)
-        {
+        for (pointsIndex =0; pointsIndex < numPoints; pointsIndex++) {
             for (dimIndex=0; dimIndex < dimensions; dimIndex++){
                 if(!scanner.hasNextDouble()){
                     System.err.println("File either ended or was improperly formated: " + filename);
