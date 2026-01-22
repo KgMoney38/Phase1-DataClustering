@@ -11,38 +11,55 @@ import java.util.*;
 public class UniformRandomSelection {
     public static void main(String[] args) {
 
+        //Parse / Validate our required arguments into an object of the class Parameter
         Parameters parameters = parseUserArguments(args);
+
+        //Read our data set file
         Dataset dataset = readFromDataset(parameters.filename);
 
+        //Generate my k random indexes, all unique
         int[] randomIndexes= generateKRandomIndexes(dataset.numberOfPoints,parameters.numOfClusters, new Random());
 
-        //Print to console
+        //Print the centers to console
         printTheCenters(dataset.data, randomIndexes);
 
         //Also print to my output files
+        //Had to build my file name outside of main since filename is static here
         String outputFilename = makeOutfileName(parameters.filename);
         saveCenterOutputsToOutputFiles(dataset.data, randomIndexes,outputFilename);
 
     }
 
+    //Just the helper method for my output file name
     private static String makeOutfileName(String filename) {
+
         String baseName= new File(filename).getName();
+
+        //Remove the extension
         int endOfFilename = baseName.lastIndexOf('.');
         if  (endOfFilename > 0) {
             baseName = baseName.substring(0, endOfFilename);
         }
+
         return baseName + "_output.txt";
         }
 
+    //Write the centers we selected to an output file
     private static void saveCenterOutputsToOutputFiles(double[][] data, int[] randomIndexes, String outputFilename) {
+
         try (PrintStream fileOut = new PrintStream(new FileOutputStream(outputFilename, true))) {
             int index =0;
+
+            //Loop for each center selected in my randomIndexes
             for (index =0; index< randomIndexes.length; index++)
             {
                 int count = randomIndexes[index];
                 int j = 0;
+
+                //Loop for each dimension in selected data point
                 for(j=0; j < data[count].length; j++)
                 {
+                    //Just add a space between the values printed
                     if (j>0){
                         fileOut.print(" ");
                     }
@@ -61,6 +78,7 @@ public class UniformRandomSelection {
         }
     }
 
+    //Just the method to print the centers we selected to the console
     private static void printTheCenters(double[][] data, int[] randomIndexes) {
         int index =0;
         for (index =0; index< randomIndexes.length; index++)
@@ -79,7 +97,9 @@ public class UniformRandomSelection {
         }
     }
 
+    //Method that delects the K unique indexes randomly and uniformly
     private static int[] generateKRandomIndexes(int numberOfPoints, int numOfClusters, Random random) {
+
         if (numOfClusters > numberOfPoints)
         {
             System.err.println("Number of clusters cant be greater than the number of points.");
@@ -87,17 +107,24 @@ public class UniformRandomSelection {
 
         }
 
+        //List that holds all of the possible indexes
         List<Integer> indexArray = new ArrayList<>();
+
+        //Fill the list
         int i = 0;
         for (i=0; i< numberOfPoints; i++)
         {
             indexArray.add(i);
         }
 
+        //Super handy built in std library function to randomize uniformly
         Collections.shuffle(indexArray, random);
 
+        //Store exactly the k number of indexes we selected
         int[] randomized = new int[numOfClusters];
         int idx = 0;
+
+        //Copy the k number of indices from our list to our randomized array
         for(idx=0; idx < numOfClusters; idx++)
         {
             randomized[idx]=indexArray.get(idx);
@@ -106,7 +133,7 @@ public class UniformRandomSelection {
         return randomized;
     }
 
-    //This method will try to read data from the file specified by the users first argument
+    //This method will try to read data from the file specified by the users first argument and will return a Dataset object
     private static Dataset readFromDataset(String filename) {
 
         Scanner scanner = null;
@@ -130,20 +157,21 @@ public class UniformRandomSelection {
         }
         int dimensions = scanner.nextInt();
 
-        //Set up the matrix for all points
+        //Set up the matrix for all points, NxD sized array
         double[][] data = new double[numPoints][dimensions];
 
-        int index = 0;
-        int j =0;
-        //Now we need to add our data to the matrix
-        for (index =0; index < numPoints; index++)
+        int pointsIndex = 0;
+        int dimIndex =0;
+
+        //Now we add our data to the matrix
+        for (pointsIndex =0; pointsIndex < numPoints; pointsIndex++)
         {
-            for (j=0; j < dimensions; j++){
+            for (dimIndex=0; dimIndex < dimensions; dimIndex++){
                 if(!scanner.hasNextDouble()){
                     System.err.println("File either ended or was improperly formated: " + filename);
                     System.exit(1);
                 }
-                data[index][j] = scanner.nextDouble();
+                data[pointsIndex][dimIndex] = scanner.nextDouble();
 
             }
 
@@ -151,17 +179,20 @@ public class UniformRandomSelection {
 
         scanner.close();
 
-        //Now, only if were able to fill our matrix properly, we return the built dataset type
+        //Now, ONLY if were able to fill our matrix properly, we return the built dataset type
         return new Dataset(numPoints, dimensions, data);
     }
 
+    //Method to parse and validate the cmd line arguments
     private static Parameters parseUserArguments(String[] args) {
+
         //Must take 5 parameters
         if(args.length != 5)
         {
             System.err.println("Incorrect Number of Arguments: Must have exactly 5 arguments");
             System.exit(1);
         }
+
         int numClusters = 0;
         int maxIteration = 0;
         double convergenceThreshold= 0.00;
@@ -220,16 +251,10 @@ public class UniformRandomSelection {
 
     //Class to handle and protect my different arguments
     private static final class Parameters {
-        //Indicated desired inputs for reference:
-        //% F = iris_bezdek.txt (name of data file)
         final String filename;
-        //% K = 3 (number of clusters)
         final int numOfClusters;
-        //% I = 100 (maximum number of iterations in a run)
         final int maxNumOfIterations;
-        //% T = 0.000001 (convergence threshold)
         final double convergenceThreshold;
-        //% R = 100 (number of runs)
         final int numOfRuns;
 
         //Constructor params for Parameters class
@@ -242,7 +267,7 @@ public class UniformRandomSelection {
         }
     }
 
-    //Class will hold the number of points, dimensions, and the actual data values.
+    //This class will hold the number of points, dimensions, and the actual data values
     private static final class Dataset {
         final int numberOfPoints;
         final int numOfDimensions;
