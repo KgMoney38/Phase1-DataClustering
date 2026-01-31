@@ -1,9 +1,9 @@
 //Kody Graham
-//01/18/2026
-//Phase 1
+//01/28/2026
+//Phase 2
 //For: Dr. Emre Celebi's Data Clustering Online Class - 4372
 
-//Coding practices resource I have decided to primarily use: https://www.cs.cornell.edu/courses/JavaAndDS/JavaStyle.html
+//Coding practices resource I have decided to keep usingwsxc: https://www.cs.cornell.edu/courses/JavaAndDS/JavaStyle.html
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,13 +29,21 @@ public class KMeans {
         //Generate my k random indexes, all unique
         int[] randomIndexes= generateKRandomIndexes(dataset.numberOfPoints,parameters.numOfClusters, new Random());
 
+        /*
+        Not for phase 2 but ill leave it for testing
+
         //Print the centers to console
-        printTheCenters(dataset.data, randomIndexes);
+        //printTheCenters(dataset.data, randomIndexes);
 
         //Also print to my output files
         //Had to build my file name outside of main since filename is static here
         String outputFilename = makeOutfileName(parameters.filename);
         saveCenterOutputsToOutputFiles(dataset.data, randomIndexes,outputFilename);
+         */
+    }
+
+    //K means object to keep track of results
+    private static KMeansResult (Dataset dataset,Parameters parameters, Random rng){
 
     }
 
