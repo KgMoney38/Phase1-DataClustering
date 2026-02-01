@@ -131,13 +131,26 @@ public class KMeans {
     }
 
     //step 5: until Centroids do not change
-    private static double computeSSE(Dataset dataset, int numberOfClusters, Random random) {
+    private static double computeSSE(Dataset dataset, double[][] centers, int[] assignedPoints) {
+        double sse = 0.0;
 
+        int i = 0;
+        for (i=0; i < dataset.numberOfPoints; i++) {
+            int cent = assignedPoints[i];
+            sse += squaredEuclideanDistance(dataset.data[i], centers[cent]);
+        }
+        return sse;
     }
 
     //Additional step: going to need to check for flatline in improvements
     private static boolean lineHasFlattened(double lastSSE, double curSSE, double threshold){
+        if (lastSSE == Double.MAX_VALUE){
+            return false;
+        }
+        double improveCheck = (lastSSE - curSSE)/lastSSE;
+        boolean hasImproved = improveCheck > threshold;
 
+        return hasImproved;
     }
 
     //Save the results
