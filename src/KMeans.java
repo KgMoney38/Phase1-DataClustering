@@ -59,17 +59,75 @@ public class KMeans {
     }
     //Step 1: select K points as initial centroids rand
     private static double[][] initialCentroids(Dataset dataset, int numberOfClusters, Random random) {
-        int[] centerIndexes =
+        int[] centerIndexes = generateKRandomIndexes(dataset.numberOfPoints, numberOfClusters, random);
+
+        double[][] centroids = new double[numberOfClusters][dataset.numOfDimensions];
+
+        int i = 0;
+        for (i = 0; i < centerIndexes.length; i++) {
+            System.arraycopy(dataset.data[centerIndexes[i]], 0, centroids[i], 0, dataset.numOfDimensions);
+        }
+        return centroids;
     }
+
     //step 2: repeat
     //Step 3: Form K clusters by assigning each point to its closest centroid
     //I know the method name is long but it is a key method so I want its function very clear
-    private static int[] assignPointsToClosestCentroid(Dataset dataset, int numberOfClusters, Random random) {
+    private static int[] assignPointsToClosestCentroid(Dataset dataset, double[][] centroids) {
+        int[] assignedPoints = new int[dataset.numberOfPoints];
 
+        int i = 0;
+        for (i = 0; i < dataset.numberOfPoints; i++) {
+            double bestDistance = Double.MAX_VALUE;
+            int bestCenter = 0;
+
+            int j = 0;
+            for (j = 0; j < dataset.numOfDimensions; j++) {
+                double distance = squaredEuclideanDistance(centroids[i], centroids[j]);
+
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    bestCenter = j;
+                }
+            }
+            assignedPoints[i] = bestCenter;
+        }
+
+        return assignedPoints;
     }
-    //Step 4: Recompute the centroid of each cluster
-    private static double[][] recomputeCentroids(Dataset dataset, int numClusters) {
 
+    //Step 4: Recompute the centroid of each cluster
+    private static double[][] recomputeCentroids(Dataset dataset, int[] assignedPoints, int numClusters) {
+
+        int dimensions = dataset.numOfDimensions;
+
+        double[][] newCentroids = new double[numClusters][dimensions];
+        int[] pointsPerCluster = new int[numClusters];
+
+        int i = 0;
+        for (i = 0; i < dataset.numberOfPoints; i++) {
+            int center = assignedPoints[i];
+            pointsPerCluster[center]++;
+
+            double[] point = dataset.data[i];
+            int j = 0;
+            for (j = 0; j < pointsPerCluster.length; j++) {
+                newCentroids[i][j] += point[j];
+            }
+        }
+        int cent = 0;
+        for ( cent = 0; cent < numClusters; cent++) {
+            if (pointsPerCluster[cent]==0){
+                continue;
+            }
+
+            int dim_index =0;
+            for (dim_index = 0; dim_index < dimensions; dim_index++) {
+                newCentroids[cent][dim_index] /= pointsPerCluster[cent];
+
+            }
+        }
+        return newCentroids;
     }
 
     //step 5: until Centroids do not change
