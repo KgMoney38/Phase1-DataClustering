@@ -155,11 +155,21 @@ public class KMeans {
 
     //Save the results
     private static final class RunResults{
+        int runNumber;
+        int iterations;
+        double finalSSE;
+        double[][] finalCents;
 
+        private RunResults(int runNumber, int iterations, double finalSSE, double[][] finalCents) {
+            this.runNumber = runNumber;
+            this.iterations = iterations;
+            this.finalSSE = finalSSE;
+            this.finalCents = finalCents;
+        }
     }
 
     //Run a full sequence of my k mean steps till convergence
-    private static RunResults runKMeans(Dataset dataset, Parameters parameters, Random rand, PrintStream fileOut, int runNum){
+    private static RunResults runKMeans(Dataset dataset, Parameters params, Random rand, PrintStream fileOut, int runNum){
 
     }
 
