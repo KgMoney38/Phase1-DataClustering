@@ -83,8 +83,8 @@ public class KMeans {
             int bestCenter = 0;
 
             int j = 0;
-            for (j = 0; j < dataset.numOfDimensions; j++) {
-                double distance = squaredEuclideanDistance(centroids[i], centroids[j]);
+            for (j = 0; j < centroids.length; j++) {
+                double distance = squaredEuclideanDistance(dataset.data[i], centroids[j]);
 
                 if (distance < bestDistance) {
                     bestDistance = distance;
@@ -149,7 +149,7 @@ public class KMeans {
             return false;
         }
         double improveCheck = (lastSSE - curSSE) / lastSSE;
-        boolean hasImproved = improveCheck > threshold;
+        boolean hasImproved = improveCheck < threshold;
 
         return hasImproved;
     }
