@@ -39,12 +39,17 @@ public class KMeans {
 
             int runIndex = 1;
 
-            for (runIndex=1;){
+            for (runIndex=1;runIndex<= parameters.numOfRuns;runIndex++) {
 
+                RunResults results = runKMeans(dataset, parameters, random, outFile, runIndex);
+
+                if (bestRun == null) {
+                    bestRun = results;
+                }
+
+                System.out.println("Best Run: " + bestRun.runNumber + ": SSE = " + bestRun.finalSSE);
+                outFile.println("Best Run: " + bestRun.runNumber + ": SSE = " + bestRun.finalSSE);
             }
-
-            System.out.println("Best Run: " + bestRun.runNumber + ": SSE = " +bestRun.finalSSE);
-            outFile.println("Best Run: " + bestRun.runNumber + ": SSE = " +bestRun.finalSSE);
 
         } catch (FileNotFoundException e) {
             System.err.println("Error writing to output file: " + outputFilename);
@@ -201,7 +206,7 @@ public class KMeans {
 
         //Step 2
         int indexNumClus = 0;
-        for (indexNumClus = 0; indexNumClus < params.numOfClusters; indexNumClus++) {
+        for (indexNumClus = 1; indexNumClus <= params.maxNumOfIterations; indexNumClus++) {
 
             //step 3
             int[] assignPoints = assignPointsToClosestCentroid(dataset, centroids);
