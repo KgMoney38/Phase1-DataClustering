@@ -18,7 +18,7 @@ import java.util.Scanner;
 
 
 public class KMeans {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
 
         //Parse / Validate our required arguments into an object of the class Parameter
         Parameters parameters = parseUserArguments(args);
@@ -26,20 +26,30 @@ public class KMeans {
         //Read our data set file
         Dataset dataset = readFromDataset(parameters.filename);
 
-        //Generate my k random indexes, all unique
-        int[] randomIndexes = generateKRandomIndexes(dataset.numberOfPoints, parameters.numOfClusters, new Random());
-
-        /*
-        Not for phase 2 but ill leave it for testing
-
-        //Print the centers to console
-        //printTheCenters(dataset.data, randomIndexes);
-
         //Also print to my output files
         //Had to build my file name outside of main since filename is static here
         String outputFilename = makeOutfileName(parameters.filename);
-        saveCenterOutputsToOutputFiles(dataset.data, randomIndexes,outputFilename);
-         */
+
+        RunResults bestRun = null;
+        RunResults allRuns = null;
+
+        try (PrintStream outFile = new PrintStream(new FileOutputStream(outputFilename))){
+
+            Random random = new Random();
+
+            int runIndex = 1;
+
+            for (runIndex=1;){
+
+            }
+
+            System.out.println("Best Run: " + bestRun.runNumber + ": SSE = " +bestRun.finalSSE);
+            outFile.println("Best Run: " + bestRun.runNumber + ": SSE = " +bestRun.finalSSE);
+
+        } catch (FileNotFoundException e) {
+            System.err.println("Error writing to output file: " + outputFilename);
+            System.exit(1);
+        }
     }
 
     //K means setup section: Absolutely no pow like you made clear in your video and set up my steps just like phase 0 Algorithm 7.1 Basic K-means algorithm
