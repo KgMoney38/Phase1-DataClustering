@@ -18,7 +18,7 @@ import java.util.Scanner;
 
 
 public class KMeans {
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) {
 
         //Parse / Validate our required arguments into an object of the class Parameter
         Parameters parameters = parseUserArguments(args);
@@ -129,7 +129,7 @@ public class KMeans {
 
             double[] point = dataset.data[i];
             int j = 0;
-            for (j = 0; j < pointsPerCluster.length; j++) {
+            for (j = 0; j < dimensions; j++) {
                 newCentroids[cluster][j] += point[j];
             }
         }
