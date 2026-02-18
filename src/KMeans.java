@@ -10,9 +10,9 @@
 //Bonus 2 attempt
 //Initially I would have said no because I thought a k means algorithm initialized uniformly
 //at random should not encounter empty clusters because at minimum at initialization the centroid
-//point, which is in the dataset, must be within the cluster. After that each iteration’s centroid
+//point, which is in the dataset, must be within the cluster. After that each iteration's centroid
 //location change should be getting more centered towards the mean distance of the points around
-//it so I didn’t see an empty cluster being likely. I wanted to visually test my theory so I started
+//it so I didn't see an empty cluster being likely. I wanted to visually test my theory so I started
 //drawing points to see if I could come up with a way to get an empty cluster. After drawing and
 //tweaking my centroids and points starting locations many times, I eventually found that when
 //centroids move towards the mean distance we can in fact end up with an empty cluster. There is a
