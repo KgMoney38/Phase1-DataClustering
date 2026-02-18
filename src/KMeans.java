@@ -3,13 +3,23 @@
 //Phase 2
 //For: Dr. Emre Celebi's Data Clustering Online Class - 4372
 
-//Bonus 2 attempt
-//I would say no, a k means algorithm initialized uniformly at random should not encounter empty clusters because at
-//minimum at initialization the centroid point, which is in the dataset, must be within the cluster. After that each
-//iterations centroid location change should be getting more centered towards the mean distance of the points around it
-//so I don’t see an empty cluster being likely.
 
 //Coding practices resource I have decided to keep primarily using: https://www.cs.cornell.edu/courses/JavaAndDS/JavaStyle.html
+
+
+//Bonus 2 attempt
+//Initially I would have said no because I thought a k means algorithm initialized uniformly
+//at random should not encounter empty clusters because at minimum at initialization the centroid
+//point, which is in the dataset, must be within the cluster. After that each iteration’s centroid
+//location change should be getting more centered towards the mean distance of the points around
+//it so I didn’t see an empty cluster being likely. I wanted to visually test my theory so I started
+//drawing points to see if I could come up with a way to get an empty cluster. After drawing and
+//tweaking my centroids and points starting locations many times, I eventually found that when
+//centroids move towards the mean distance we can in fact end up with an empty cluster. There is a
+//diagram in my report that illustrates the exact drawing I ended up with when testing to see if I could
+//find a situation where a cluster could be empty.
+
+
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -162,7 +172,7 @@ public class KMeans {
             }
         }
 
-        //Divide the sums by count to get the means
+        //Divide the sums by points per cluster to get the mean
         int cent = 0;
         for(cent = 0; cent < numClusters; cent++) {
 
@@ -204,7 +214,7 @@ public class KMeans {
 
         //Not really a fan of returning an argument instead of a variable but intelliJ was giving me a warning saying
         //declaring a variable just to return it on the next line was redundant and I could not find a mention of how to
-        //handle this in my code style document so just went wit intelliJ's recommendation.
+        //handle this in my code style document so just went with intelliJ's recommendation.
         return improveCheck < threshold;
     }
 
@@ -372,7 +382,7 @@ public class KMeans {
         int[] randomized = new int[numOfClusters];
         int idx = 0;
 
-        //Copy the k number of indices from our list to our randomized array
+        //Copy the k number of indices from our list to my randomized array
         for(idx=0; idx < numOfClusters; idx++) {
             randomized[idx]=indexArray.get(idx);
         }
@@ -425,7 +435,7 @@ public class KMeans {
 
         scanner.close();
 
-        //Now, ONLY if were able to fill our matrix properly, we return the built dataset type
+        //Now, ONLY if were able to fill our matrix properly, I return the built dataset type
         return new Dataset(numPoints, dimensions, data);
     }
 
@@ -482,8 +492,8 @@ public class KMeans {
             System.err.println("The maximum number of iterations must be a positive integer.");
             System.exit(1);
         }
-        if(convergenceThreshold<0){
-            System.err.println("The convergence threshold must be a non negative real number.");
+        if(convergenceThreshold<0 || convergenceThreshold>=1){
+            System.err.println("The convergence threshold must be a non negative real number less than 1.");
             System.exit(1);
         }
         if(numRuns<1){
