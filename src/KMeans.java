@@ -172,9 +172,29 @@ public class KMeans {
             }
         }
 
+        //Check for 0 points in a cluster now that i think its possible to have an empty cluster because dividing by 0
+        //points per cluster would cause an error. I know our phase 0 talked about a couple ways of handling empty clusters
+        //but since you said we can ignore them for now im just using this check to exit cleanly and inform the user of what happened
+        //int j = 0;
+        //for(j = 0; j < pointsPerCluster.length; j++) {
+        //    if (pointsPerCluster[j] ==0)
+        //    {
+        //        System.err.println("Empty Cluster Detected: Can not divide by 0! Please try re-running the algorithm, this condition is rare!");
+        //        System.exit(1);
+        //    }
+        //}
+
+
         //Divide the sums by points per cluster to get the mean
         int cent = 0;
         for(cent = 0; cent < numClusters; cent++) {
+
+            //IntelliJ's IDE recommended arraycopy i was just going to use another for loop to reassign to the last centroid
+            //since it clearly wasnt empty. Using arraycopy is way more efficient code wise for sure.
+            if (pointsPerCluster[cent] == 0) {
+                System.arraycopy(lastCentroid[cent], 0, newCentroids[cent], 0, dimensions);
+                continue;
+            }
 
             int dim_index = 0;
             for (dim_index = 0; dim_index < dimensions; dim_index++) {
