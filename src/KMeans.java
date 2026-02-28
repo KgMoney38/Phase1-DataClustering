@@ -310,6 +310,7 @@ public class KMeans {
 
     //Note for reference during implementation: min max norm formula: x_scaled = x-xmin / (xmax- xmin) and must be between 0 and 1
 
+    // START FOR PART 1 of PHASE 3
     private static Dataset minMaxNorm(Dataset dataset){
 
         int numD = dataset.numOfDimensions;
@@ -379,6 +380,31 @@ public class KMeans {
             System.exit(1);
         }
     }
+
+    //END PART 1 of PHASE 3
+    //START PART 2 of PHASE 3
+    //Random Partition Method
+    //Note for self: while implementing think of this method as just random assigning points to clusters and then using
+    //the centroids of those randomly assigned points to form new starting centroids
+
+    private static double[][] randomPartitionCentroids(Dataset dataset, int numOfClusters, Random rand) {
+
+        int[] assignedCentroids = assignPointsRandomly(dataset.numberOfPoints, numOfClusters, rand);
+    }
+
+    private static int[] assignPointsRandomly(int numPoints, int numOfClusters, Random rand) {
+
+        int[] assignedCentroids = new int[numPoints];
+        for (int i = 0; i < numPoints; i++) {
+            assignedCentroids[i] = rand.nextInt(numOfClusters);
+        }
+
+        return assignedCentroids;
+
+    }
+
+
+    //END PART 2 OF PHASE 3
 
 
     //End: K Means Algorithm Section
