@@ -301,6 +301,60 @@ public class KMeans {
 
     //Anymore helpers for k means will go here
 
+    //I am going to consider all of my phase 3 requirements as "helpers" for my base K mean algorithm so all of phase 3
+    //will be here
+
+    //Note for reference during implementation: min max norm formula: x_scaled = x-xmin / (xmax- xmin) and must be between 0 and 1
+
+    private static Dataset MinMaxNorm(Dataset dataset, Parameters param, double [][] data){
+
+        int numD = dataset.numOfDimensions;
+        int numP = dataset.numberOfPoints;
+
+        double[] minsInEach = new double[numD];
+        double[] maxsInEach = new double[numD];
+
+        //Assign high positive to min and low negative to max in every position so they are guarenteed to be overwritten durring my loop to collect them
+        for (int dim = 0; dim < numD; dim++) {
+            minsInEach[dim] = Double.POSITIVE_INFINITY;
+            maxsInEach[dim] = Double.NEGATIVE_INFINITY;
+        }
+
+        //Loop through each dim and then through each point to find min and max vals
+        for (int numPointsInDim = 0; numPointsInDim < numP; numPointsInDim++) {
+
+            for(int dim = 0; dim < numD; dim++) {
+                double val = data[numPointsInDim][dim];
+                if(val < minsInEach[dim]) {
+                    minsInEach[dim] = val;
+                }
+                if(val > maxsInEach[dim]) {
+                    maxsInEach[dim] = val;
+                }
+
+            }
+        }
+
+        double[][] x_scaled = new double[numP][numD];
+        for(int pointNum = 0; pointNum < numP; pointNum++) {
+            for(int dim = 0; dim < numD; dim++) {
+                double denominator = maxsInEach[dim] - minsInEach[dim];
+                if(denominator == 0) {
+                    continue;
+                }
+                else {
+                    x_scaled[pointNum][dim] = (data[pointNum][dim] - minsInEach[dim]);
+                }
+            }
+        }
+        double[][] newDataset = new dataset.data;
+        newDataset = x_scaled;
+
+        return newDataset;
+    }
+
+
+
     //End: K Means Algorithm Section
 
     //Just the helper method for my output file name
