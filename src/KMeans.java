@@ -340,6 +340,7 @@ public class KMeans {
             }
         }
 
+        //Apply the min max norm formula to get my scaled data points
         double[][] x_scaled = new double[numP][numD];
         for(int pointNum = 0; pointNum < numP; pointNum++) {
             for(int dim = 0; dim < numD; dim++) {
@@ -355,9 +356,12 @@ public class KMeans {
 
         Dataset newDataset = new Dataset(numP, numD, x_scaled);
 
+        //Return my new dataset with normalized values
         return newDataset;
     }
 
+    //Just a simple function to print my dataset after normalization to help confirm my normalization is working.
+    //Rewrites each run
     private static void printNormDataset( Dataset dataset, String outputFilename) {
 
         try (PrintStream fileOut = new PrintStream(new FileOutputStream(outputFilename))) {
@@ -389,9 +393,37 @@ public class KMeans {
 
     private static double[][] randomPartitionCentroids(Dataset dataset, int numOfClusters, Random rand) {
 
+        //Random assign my points to my given num of clusters
         int[] assignedCentroids = assignPointsRandomly(dataset.numberOfPoints, numOfClusters, rand);
+
+        double[][] totalSum = new double[numOfClusters][dataset.numOfDimensions];
+        int[] totalClusters = new int[numOfClusters];
+
+        //Add all the points together for each cluster
+        for (int cluster = 0; cluster < numOfClusters; cluster++) {
+            int clusterNum = assignedCentroids[cluster];
+            totalClusters[cluster]++;
+
+            for (int dim = 0; dim < dataset.numOfDimensions; dim++) {
+                totalSum[cluster][dim] += dataset.data[clusterNum][dim];
+            }
+        }
+
+        //now each clusters mean for my new centroid points
+        double[][] partitionCentroids = new double[numOfClusters][dataset.numOfDimensions];
+        for (int cluster = 0; cluster < numOfClusters; cluster++) {
+            for(int dim = 0; dim < dataset.numOfDimensions; dim++) {
+                partitionCentroids[cluster][dim] = totalSum[cluster][dim]/totalClusters[cluster];
+
+            }
+
+
+        }
+        //And finally return my new mean based centroids
+        return partitionCentroids;
     }
 
+    //Just a helper for my partition function, just loops through the num of points to assign each to one of the clusters at random
     private static int[] assignPointsRandomly(int numPoints, int numOfClusters, Random rand) {
 
         int[] assignedCentroids = new int[numPoints];
