@@ -1,25 +1,10 @@
 //Kody Graham
-//01/28/2026
-//Phase 2
+//02/25/2026
+//Phase 3
 //For: Dr. Emre Celebi's Data Clustering Online Class - 4372
 
 
 //Coding practices resource I have decided to keep primarily using: https://www.cs.cornell.edu/courses/JavaAndDS/JavaStyle.html
-
-
-//Bonus 2 attempt
-//Initially I would have said no because I thought a k means algorithm initialized uniformly
-//at random should not encounter empty clusters because at minimum at initialization the centroid
-//point, which is in the dataset, must be within the cluster. After that each iteration's centroid
-//location change should be getting more centered towards the mean distance of the points around
-//it so I didn't see an empty cluster being likely. I wanted to visually test my theory so I started
-//drawing points to see if I could come up with a way to get an empty cluster. After drawing and
-//tweaking my centroids and points starting locations many times, I eventually found that when
-//centroids move towards the mean distance we can in fact end up with an empty cluster. There is a
-//diagram in my report that illustrates the exact drawing I ended up with when testing to see if I could
-//find a situation where a cluster could be empty.
-
-
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -172,25 +157,27 @@ public class KMeans {
             }
         }
 
-        //Check for 0 points in a cluster now that i think its possible to have an empty cluster because dividing by 0
-        //points per cluster would cause an error. I know our phase 0 talked about a couple ways of handling empty clusters
-        //but since you said we can ignore them for now im just using this check to exit cleanly and inform the user of what happened
-        //int j = 0;
-        //for(j = 0; j < pointsPerCluster.length; j++) {
-        //    if (pointsPerCluster[j] ==0)
-        //    {
-        //        System.err.println("Empty Cluster Detected: Can not divide by 0! Please try re-running the algorithm, this condition is rare!");
-        //        System.exit(1);
-        //    }
-        //}
+        //Initial idea for making sure we dont divide by 0, just exit
+        //Leaving this check in case copying the array ends up being a wrong way to handle empty clusters.
+        /*Check for 0 points in a cluster now that i think its possible to have an empty cluster because dividing by 0
+        points per cluster would cause an error. I know our phase 0 talked about a couple ways of handling empty clusters
+        but since you said we can ignore them for now im just using this check to exit cleanly and inform the user of what happened
+        int j = 0;
+        for(j = 0; j < pointsPerCluster.length; j++) {
+            if (pointsPerCluster[j] ==0)
+            {
+                System.err.println("Empty Cluster Detected: Can not divide by 0! Please try re-running the algorithm, this condition is rare!");
+                System.exit(1);
+            }
+        }*/
 
 
         //Divide the sums by points per cluster to get the mean
         int cent = 0;
         for(cent = 0; cent < numClusters; cent++) {
 
-            //IntelliJ's IDE recommended arraycopy i was just going to use another for loop to reassign to the last centroid
-            //since it clearly wasnt empty. Using arraycopy is way more efficient code wise for sure.
+            /*IntelliJ's IDE recommended arraycopy i was just going to use another for loop to reassign the last centroid
+            to the new since in the last iteration it clearly wasnt empty. Using arraycopy is way more efficient code wise for sure.*/
             if (pointsPerCluster[cent] == 0) {
                 System.arraycopy(lastCentroid[cent], 0, newCentroids[cent], 0, dimensions);
                 continue;
@@ -232,9 +219,9 @@ public class KMeans {
 
         double improveCheck = (lastSSE - curSSE) / lastSSE;
 
-        //Not really a fan of returning an argument instead of a variable but intelliJ was giving me a warning saying
-        //declaring a variable just to return it on the next line was redundant and I could not find a mention of how to
-        //handle this in my code style document so just went with intelliJ's recommendation.
+        /*Not really a fan of returning an argument instead of a variable but intelliJ was giving me a warning saying
+        declaring a variable just to return it on the next line was redundant and I could not find a mention of how to
+        handle this in my code style document so just went with intelliJ's recommendation.*/
         return improveCheck < threshold;
     }
 
@@ -395,7 +382,7 @@ public class KMeans {
             indexArray.add(i);
         }
 
-        //Super handy built in std library function to randomize uniformly
+        //Super handy built in std library function I found to randomize uniformly
         Collections.shuffle(indexArray, random);
 
         //Store exactly the k number of indexes we selected
