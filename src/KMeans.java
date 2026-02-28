@@ -27,6 +27,10 @@ public class KMeans {
         //Read our data set file
         Dataset dataset = readFromDataset(parameters.filename);
 
+        dataset = minMaxNorm(dataset);
+
+        String outFileName= "_normalized.txt";
+        printNormDataset(dataset, outFileName);
         //Also print to my output files
         //Had to build my file name outside of main since filename is static here
         String outputFilename = makeOutfileName(parameters.filename);
@@ -306,7 +310,7 @@ public class KMeans {
 
     //Note for reference during implementation: min max norm formula: x_scaled = x-xmin / (xmax- xmin) and must be between 0 and 1
 
-    private static Dataset MinMaxNorm(Dataset dataset, Parameters param, double [][] data){
+    private static Dataset minMaxNorm(Dataset dataset){
 
         int numD = dataset.numOfDimensions;
         int numP = dataset.numberOfPoints;
@@ -324,7 +328,7 @@ public class KMeans {
         for (int numPointsInDim = 0; numPointsInDim < numP; numPointsInDim++) {
 
             for(int dim = 0; dim < numD; dim++) {
-                double val = data[numPointsInDim][dim];
+                double val = dataset.data[numPointsInDim][dim];
                 if(val < minsInEach[dim]) {
                     minsInEach[dim] = val;
                 }
@@ -343,16 +347,38 @@ public class KMeans {
                     continue;
                 }
                 else {
-                    x_scaled[pointNum][dim] = (data[pointNum][dim] - minsInEach[dim]);
+                    x_scaled[pointNum][dim] = (dataset.data[pointNum][dim] - minsInEach[dim]) / denominator;
                 }
             }
         }
-        double[][] newDataset = new dataset.data;
-        newDataset = x_scaled;
+
+        Dataset newDataset = new Dataset(numP, numD, x_scaled);
 
         return newDataset;
     }
 
+    private static void printNormDataset( Dataset dataset, String outputFilename) {
+
+        try (PrintStream fileOut = new PrintStream(new FileOutputStream(outputFilename))) {
+
+            for(int point = 0; point < dataset.numberOfPoints; point++) {
+                for(int dim = 0; dim < dataset.numOfDimensions; dim++) {
+
+                    if (dim > 0) {
+                        fileOut.print(" ");
+                    }
+
+                    fileOut.print(dataset.data[point][dim]);
+                }
+                fileOut.println();
+
+            }
+
+        }catch (Exception e) {
+            System.err.println("Error writing normalized dataset");
+            System.exit(1);
+        }
+    }
 
 
     //End: K Means Algorithm Section
