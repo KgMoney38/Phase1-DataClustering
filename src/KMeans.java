@@ -47,8 +47,8 @@ public class KMeans {
             RunResults bestRun = null;
             RunResults allRuns = null;
 
-            //overwrite existing file and automatically close
-            try (PrintStream outFile = new PrintStream(new FileOutputStream(outputFilename))) {
+            //append existing file and now that we are doing a comparison
+            try (PrintStream outFile = new PrintStream(new FileOutputStream(outputFilename, true))) {
 
                 Random random = new Random();
 
@@ -68,6 +68,40 @@ public class KMeans {
 
                 System.out.println("Best Run: " + bestRun.runNumber + ": SSE = " + bestRun.finalSSE);
                 outFile.println("Best Run: " + bestRun.runNumber + ": SSE = " + bestRun.finalSSE);
+
+                //Run data for each method of initial centroids
+                System.out.println(" ");
+                System.out.println("##################################################");
+                outFile.println(" ");
+                outFile.println("##################################################");
+
+                if(centroid_start_method==0){
+                    System.out.println("Method: Initial Centroids by Random Selection");
+                    outFile.println("Method: Initial Centroids by Random Selection");
+                } else{
+                    System.out.println("Method: Centroids by Random Partition");
+                    outFile.println("Method: Centroids by Random Partition");
+                }
+                System.out.println("##################################################");
+
+                outFile.println("##################################################");
+
+                System.out.println();
+                System.out.println("Initial SSE: " + bestRun.initialSSE);
+                System.out.println("Final SSE: " + bestRun.finalSSE);
+                System.out.println("Number of Iterations: " + bestRun.iterations);
+                System.out.println();
+                System.out.println("##################################################");
+
+
+                outFile.println("Initial SSE: " + bestRun.initialSSE);
+                outFile.println("Final SSE: " + bestRun.finalSSE);
+                outFile.println("Number of Iterations: " + bestRun.iterations);
+                outFile.println();
+                outFile.println("##################################################");
+
+
+
 
 
             } catch (FileNotFoundException e) {
@@ -229,11 +263,13 @@ public class KMeans {
         int iterations;
         double finalSSE;
         double[][] finalCents;
+        double initialSSE;
 
-        private RunResults(int runNumber, int iterations, double finalSSE, double[][] finalCents) {
+        private RunResults(int runNumber, int iterations, double finalSSE, double[][] finalCents, double initialSSE) {
             this.runNumber = runNumber;
             this.iterations = iterations;
             this.finalSSE = finalSSE;
+            this.initialSSE = initialSSE;
             this.finalCents = finalCents;
         }
     }
@@ -270,8 +306,7 @@ public class KMeans {
 
         double lastSSE = Double.POSITIVE_INFINITY;
         double curSSE = Double.POSITIVE_INFINITY;
-        double[] initialSSE = {Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY};
-        double[] finalSSE =  {Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY};
+        double initialSSE = Double.NEGATIVE_INFINITY;
         int iterationsDone = 0;
 
         //Step 2
@@ -290,13 +325,13 @@ public class KMeans {
             curSSE = computeSSE(dataset, newCentroids, assignPoints);
 
             //Save start sse
-            if(iterationsDone == 0 && centroid_start_method==0){
-                initialSSE[0] = curSSE;
+            if(indexNumClus == 1){
+                initialSSE = curSSE;
             }
 
-            if (iterationsDone==0 && centroid_start_method == 1) {
-                initialSSE[1] = curSSE;
-            }
+            //if (iterationsDone==0 && centroid_start_method == 1) {
+            //    initialSSE[1] = curSSE;
+            //}
 
             //Output
             System.out.println("Iteration " + indexNumClus + " : SSE = " + curSSE);
@@ -320,7 +355,7 @@ public class KMeans {
             fileOut.println();
         }
 
-        return new RunResults(runNum, iterationsDone, curSSE, centroids);
+        return new RunResults(runNum, iterationsDone, curSSE, centroids, initialSSE);
     }
 
     //Anymore helpers for k means will go here
