@@ -9,7 +9,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,51 +20,61 @@ import java.util.Scanner;
 public class KMeans {
     public static void main(String[] args) {
 
-        //Parse / Validate our required arguments into an object of the class Parameter
-        Parameters parameters = parseUserArguments(args);
+        int centroid_start_method = 0;
 
-        //Read our data set file
-        Dataset dataset = readFromDataset(parameters.filename);
+        while (centroid_start_method != 2) {
 
-        dataset = minMaxNorm(dataset);
+            //Parse / Validate our required arguments into an object of the class Parameter
+            Parameters parameters = parseUserArguments(args);
 
-        String outFileName= "_normalized.txt";
-        printNormDataset(dataset, outFileName);
-        //Also print to my output files
-        //Had to build my file name outside of main since filename is static here
-        String outputFilename = makeOutfileName(parameters.filename);
+            //Read our data set file
+            Dataset dataset = readFromDataset(parameters.filename);
 
-        //Track my best run and may implement a function for tracking the avg total
-        //of all runs and comparing it to the best run
-        RunResults bestRun = null;
-        RunResults allRuns = null;
+            //Normalize my whole data set before k means runs
+            dataset = minMaxNorm(dataset);
 
-        //overwrite existing file and automatically close
-        try (PrintStream outFile = new PrintStream(new FileOutputStream(outputFilename))){
+            //Print the updated normalized data set for correctness checks
+            String base = new File(parameters.filename).getName();
+            String outFileName = "normalized_output_" + base;
+            printNormDataset(dataset, outFileName);
 
-            Random random = new Random();
+            //Also print to my output files
+            //Had to build my file name outside of main since filename is static here
+            String outputFilename = makeOutfileName(parameters.filename);
 
-            int runIndex = 1;
+            //Track my best run and may implement a function for tracking the avg total
+            //of all runs and comparing it to the best run
+            RunResults bestRun = null;
+            RunResults allRuns = null;
 
-            //Each run uses different real random centers just like my original phase 1
-            for (runIndex=1;runIndex<= parameters.numOfRuns;runIndex++) {
+            //overwrite existing file and automatically close
+            try (PrintStream outFile = new PrintStream(new FileOutputStream(outputFilename))) {
 
-                //Run my whole K Means function
-                RunResults results = runKMeans(dataset, parameters, random, outFile, runIndex);
+                Random random = new Random();
 
-                //If first run or smaller SSE update
-                if (bestRun == null || results.finalSSE < bestRun.finalSSE) {
-                    bestRun = results;
+                int runIndex = 1;
+
+                //Each run uses different real random centers just like my original phase 1
+                for (runIndex = 1; runIndex <= parameters.numOfRuns; runIndex++) {
+
+                    //Run my whole K Means function
+                    RunResults results = runKMeans(dataset, parameters, random, outFile, runIndex, centroid_start_method);
+
+                    //If first run or smaller SSE update
+                    if (bestRun == null || results.finalSSE < bestRun.finalSSE) {
+                        bestRun = results;
+                    }
                 }
-            }
 
                 System.out.println("Best Run: " + bestRun.runNumber + ": SSE = " + bestRun.finalSSE);
                 outFile.println("Best Run: " + bestRun.runNumber + ": SSE = " + bestRun.finalSSE);
 
 
-        } catch (FileNotFoundException e) {
-            System.err.println("Error writing to output file: " + outputFilename);
-            System.exit(1);
+            } catch (FileNotFoundException e) {
+                System.err.println("Error writing to output file: " + outputFilename);
+                System.exit(1);
+            }
+            centroid_start_method += 1;
         }
     }
 
@@ -90,7 +99,7 @@ public class KMeans {
         return squaredDist;
     }
 
-    //Step 1: select K points as initial centroids rand
+    //Step 1: select K points as initial centroids rand // Phase 2 initial centroids
     private static double[][] initialCentroids(Dataset dataset, int numberOfClusters, Random random) {
 
         //Select the unique point indexes
@@ -161,21 +170,6 @@ public class KMeans {
             }
         }
 
-        //Initial idea for making sure we dont divide by 0, just exit
-        //Leaving this check in case copying the array ends up being a wrong way to handle empty clusters.
-        /*Check for 0 points in a cluster now that i think its possible to have an empty cluster because dividing by 0
-        points per cluster would cause an error. I know our phase 0 talked about a couple ways of handling empty clusters
-        but since you said we can ignore them for now im just using this check to exit cleanly and inform the user of what happened
-        int j = 0;
-        for(j = 0; j < pointsPerCluster.length; j++) {
-            if (pointsPerCluster[j] ==0)
-            {
-                System.err.println("Empty Cluster Detected: Can not divide by 0! Please try re-running the algorithm, this condition is rare!");
-                System.exit(1);
-            }
-        }*/
-
-
         //Divide the sums by points per cluster to get the mean
         int cent = 0;
         for(cent = 0; cent < numClusters; cent++) {
@@ -245,7 +239,7 @@ public class KMeans {
     }
 
     //Run a full sequence of my k mean steps till convergence, basically the main for calling my K Means method
-    private static RunResults runKMeans(Dataset dataset, Parameters params, Random rand, PrintStream fileOut, int runNum) {
+    private static RunResults runKMeans(Dataset dataset, Parameters params, Random rand, PrintStream fileOut, int runNum, int centroid_start_method) {
 
         //Print header in both console and my file
         System.out.println("Run #: " + runNum);
@@ -258,16 +252,33 @@ public class KMeans {
 
         //Now call each of my steps
         //Step 1
-        double[][] centroids = initialCentroids(dataset, params.numOfClusters, rand);
+        double[][] centroids = new double[0][];
+        //Phase 2 starting centroids
+        if (centroid_start_method == 0) {
+            centroids = initialCentroids(dataset, params.numOfClusters, rand);
+        }
+        else if (centroid_start_method == 1) {
+
+            //Phase 3 starting centroids
+            centroids= randomPartitionCentroids(dataset, params.numOfClusters, rand);
+
+        }
+        else{
+            System.err.println("Error: centroid_start_method has to be either 0 or 1");
+        }
+
 
         double lastSSE = Double.POSITIVE_INFINITY;
         double curSSE = Double.POSITIVE_INFINITY;
-
+        double[] initialSSE = {Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY};
+        double[] finalSSE =  {Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY};
         int iterationsDone = 0;
 
         //Step 2
         int indexNumClus = 0;
         for (indexNumClus = 1; indexNumClus <= params.maxNumOfIterations; indexNumClus++) {
+
+
 
             //step 3
             int[] assignPoints = assignPointsToClosestCentroid(dataset, centroids);
@@ -277,6 +288,15 @@ public class KMeans {
 
             //SSE
             curSSE = computeSSE(dataset, newCentroids, assignPoints);
+
+            //Save start sse
+            if(iterationsDone == 0 && centroid_start_method==0){
+                initialSSE[0] = curSSE;
+            }
+
+            if (iterationsDone==0 && centroid_start_method == 1) {
+                initialSSE[1] = curSSE;
+            }
 
             //Output
             System.out.println("Iteration " + indexNumClus + " : SSE = " + curSSE);
@@ -307,7 +327,6 @@ public class KMeans {
 
     //I am going to consider all of my phase 3 requirements as "helpers" for my base K mean algorithm so all of phase 3
     //will be here
-
     //Note for reference during implementation: min max norm formula: x_scaled = x-xmin / (xmax- xmin) and must be between 0 and 1
 
     // START FOR PART 1 of PHASE 3
@@ -345,8 +364,11 @@ public class KMeans {
         for(int pointNum = 0; pointNum < numP; pointNum++) {
             for(int dim = 0; dim < numD; dim++) {
                 double denominator = maxsInEach[dim] - minsInEach[dim];
+                //Check for 0 value testing several options
                 if(denominator == 0) {
-                    continue;
+                    //continue
+                    //denominator = .000000000001;
+                    x_scaled[pointNum][dim] = 0.0;
                 }
                 else {
                     x_scaled[pointNum][dim] = (dataset.data[pointNum][dim] - minsInEach[dim]) / denominator;
@@ -400,12 +422,12 @@ public class KMeans {
         int[] totalClusters = new int[numOfClusters];
 
         //Add all the points together for each cluster
-        for (int cluster = 0; cluster < numOfClusters; cluster++) {
-            int clusterNum = assignedCentroids[cluster];
-            totalClusters[cluster]++;
+        for (int point = 0; point < dataset.numberOfPoints; point++) {
+            int clusterNum = assignedCentroids[point];
+            totalClusters[clusterNum]++;
 
             for (int dim = 0; dim < dataset.numOfDimensions; dim++) {
-                totalSum[cluster][dim] += dataset.data[clusterNum][dim];
+                totalSum[clusterNum][dim] += dataset.data[point][dim];
             }
         }
 
@@ -455,52 +477,7 @@ public class KMeans {
         return baseName + "_output.txt";
         }
 
-    //Write the centers we selected to an output file
-    private static void saveCenterOutputsToOutputFiles(double[][] data, int[] randomIndexes, String outputFilename) {
 
-        try (PrintStream fileOut = new PrintStream(new FileOutputStream(outputFilename, true))) {
-            int index =0;
-
-            //Loop for each center selected in my randomIndexes
-            for (index =0; index< randomIndexes.length; index++) {
-                int count = randomIndexes[index];
-                int j = 0;
-
-                //Loop for each dimension in selected data point
-                for(j=0; j < data[count].length; j++) {
-                    //Just add a space between the values printed
-                    if (j>0){
-                        fileOut.print(" ");
-                    }
-                    fileOut.print(data[count][j]);
-
-                }
-                fileOut.println();
-            }
-            fileOut.println();
-
-        } catch (IOException e) {
-            System.err.println("Error writing to the output file: " + outputFilename);
-            System.exit(1);
-        }
-    }
-
-    //Just the method to print the centers we selected to the console
-    private static void printTheCenters(double[][] data, int[] randomIndexes) {
-        int index =0;
-        for (index =0; index< randomIndexes.length; index++) {
-            int count = randomIndexes[index];
-            int j = 0;
-            for(j=0; j < data[count].length; j++) {
-                if (j>0){
-                    System.out.print(" ");
-                }
-                System.out.print(data[count][j]);
-
-            }
-            System.out.println();
-        }
-    }
 
     //Method that delects the K unique indexes randomly and uniformly
     private static int[] generateKRandomIndexes(int numberOfPoints, int numOfClusters, Random random) {
@@ -683,3 +660,75 @@ public class KMeans {
     }
 
 }
+
+
+
+
+
+
+
+/*
+No longer used but keeping just in case:
+
+    //Write the centers we selected to an output file
+    private static void saveCenterOutputsToOutputFiles(double[][] data, int[] randomIndexes, String outputFilename) {
+
+        try (PrintStream fileOut = new PrintStream(new FileOutputStream(outputFilename, true))) {
+            int index =0;
+
+            //Loop for each center selected in my randomIndexes
+            for (index =0; index< randomIndexes.length; index++) {
+                int count = randomIndexes[index];
+                int j = 0;
+
+                //Loop for each dimension in selected data point
+                for(j=0; j < data[count].length; j++) {
+                    //Just add a space between the values printed
+                    if (j>0){
+                        fileOut.print(" ");
+                    }
+                    fileOut.print(data[count][j]);
+
+                }
+                fileOut.println();
+            }
+            fileOut.println();
+
+        } catch (IOException e) {
+            System.err.println("Error writing to the output file: " + outputFilename);
+            System.exit(1);
+        }
+    }
+
+    //Just the method to print the centers we selected to the console
+    private static void printTheCenters(double[][] data, int[] randomIndexes) {
+        int index =0;
+        for (index =0; index< randomIndexes.length; index++) {
+            int count = randomIndexes[index];
+            int j = 0;
+            for(j=0; j < data[count].length; j++) {
+                if (j>0){
+                    System.out.print(" ");
+                }
+                System.out.print(data[count][j]);
+
+            }
+            System.out.println();
+        }
+    }
+
+
+        //Initial idea for making sure we dont divide by 0, just exit
+        //Leaving this check in case copying the array ends up being a wrong way to handle empty clusters.
+        Check for 0 points in a cluster now that i think its possible to have an empty cluster because dividing by 0
+        points per cluster would cause an error. I know our phase 0 talked about a couple ways of handling empty clusters
+        but since you said we can ignore them for now im just using this check to exit cleanly and inform the user of what happened
+        int j = 0;
+        for(j = 0; j < pointsPerCluster.length; j++) {
+            if (pointsPerCluster[j] ==0)
+            {
+                System.err.println("Empty Cluster Detected: Can not divide by 0! Please try re-running the algorithm, this condition is rare!");
+                System.exit(1);
+            }
+        }
+*/
